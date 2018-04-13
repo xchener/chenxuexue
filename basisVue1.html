@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>vue基础2</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<style>
+</style>
+<body>
+  <div id="app">
+    <!-- 一、条件渲染: v-if | v-else-if | v-else | v-show -->
+    <div v-if="testIf">我是根据v-if来显示的</div>
+    <div v-else>若v-if为false的话我就出现了</div>
+    <template v-if="testIf1">
+      <h1>Title</h1>
+      <p>Paragraph 1</p>
+      <p>Paragraph 2</p>
+    </template>
+    <!-- 用key管理可以复用的元素 -->
+    <template v-if="loginType === 'username'">
+      <label>Username</label>
+      <input placeholder="Enter your username" key="username-input">
+    </template>
+    <template v-else>
+      <label>Email</label>
+      <input placeholder="Enter your email address" key="email-input">
+    </template>
+    <button @click="changeLoginType">切换登录方式</button>
+    <!-- v-show: v-show 不支持 <template> 元素，也不支持 v-else,带有 v-show 的元素始终会被渲染并保留在 DOM 中。v-show 只是简单地切换元素的 CSS 属性 display -->
+
+    <!-- v-if vs v-show:
+      1、v-if 是“真正”的条件渲染，因为它会确保在切换过程中条件块内的事件监听器和子组件适当地被销毁和重建。
+
+      2、v-if 也是惰性的：如果在初始渲染时条件为假，则什么也不做——直到条件第一次变为真时，才会开始渲染条件块。
+
+      3、v-show 就简单得多——不管初始条件是什么，元素总是会被渲染，并且只是简单地基于 CSS 进行切换。
+
+      4、一般来说，v-if 有更高的切换开销，而 v-show 有更高的初始渲染开销。因此，如果需要非常频繁地切换，则使用 v-show 较好；如果在运行时条件很少改变，则使用 v-if 较好 -->
+
+    <!-- 二、列表渲染 v-for -->
+    <!-- 把一个 数组 对应为一组元素,我们也可以用of代替in，因为它是最接近 JavaScript 迭代器的语法 -->
+    <ul>
+      <li v-for="item in nameList">{{item.name}}</li>
+      <!-- <li v-for="(item, index) in nameList">{{item.name}}</li> -->
+    </ul>
+    <!-- 一个对象中的v-for,可以通过一个对象的属性来迭代 -->
+    <ul>
+      <li v-for="(value, key, index) in nameDetail">{{index}}. {{key}}: {{value}}</li>
+    </ul>
+  </div>
+  
+  <script>
+    var data = {
+      testIf: true,
+      testIf1: true,
+      loginType: 'username',
+      // 可以对数组使用push(),pop(),splice(),shift(),unshift(),sort(),reverse等
+      // 注意：不能利用索引直接设置一个项，eg: item[1] = newValue;不是响应式的
+      // 当你修改数组的长度时，例如：vm.items.length = newLength也不是响应式的
+      nameList: [
+        { id: 1, name: 'Li Ming' },
+        { id: 2, name: 'Zhang San' },
+        { id: 3, name: 'Li Si' }
+      ],
+      // 对象更改检测
+      nameDetail: {
+        name: 'Liu Hong',
+        age: 25,
+        birthday: '1994-11-30'
+      }
+    };
+    var app = new Vue({
+      el: '#app',
+      data,
+      methods: {
+        changeLoginType: function() {
+          this.loginType = this.loginType == 'username' ? 'email' : 'username'
+          return this.loginType;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
