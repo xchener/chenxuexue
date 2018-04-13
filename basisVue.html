@@ -7,6 +7,14 @@
   <title>Document</title>
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 </head>
+<style>
+  .textColor {
+    color: red;
+  }
+  .errorClass {
+    font-size: 18px;
+  }
+</style>
 <body>
   <!-- v-bind为指令：将这个元素节点的 title 特性和 Vue 实例的 message 属性保持一致 -->
   <div id="app" :title="message">
@@ -31,8 +39,37 @@
     <!-- v-once指令插入的值不会随着实例数据的改变而更新 -->
     <div v-once>{{message}}</div>
     <!-- 指令 (Directives) 是带有 v- 前缀的特殊属性。指令属性的值预期是单个 JavaScript 表达式 (v-for 是例外情况)。指令的职责是，当表达式的值改变时，将其产生的连带影响，响应式地作用于 DOM。 -->
+    
     <!-- 修饰符：以半角句号 . 指明的特殊后缀，用于指出一个指令应该以特殊方式绑定 -->
+
     <!-- v-bind的缩写“:”，v-on的缩写“@” -->
+
+    <!-- 计算属性和侦听器： 1、对于任何复杂的逻辑，你都应当使用计算属性computed。
+                          2、像绑定普通属性一样在模板中绑定计算属性 -->
+    <!-- 计算属性 vs 方法：两种方式的最终结果确实是完全相同的。然而，不同的是计算属性是基于它们的依赖进行缓存的。计算属性只有在它的相关依赖发生改变时才会重新求值。
+      这就意味着只要 message 还没有发生改变，多次访问 reversedMessage 计算属性会立即返回之前的计算结果，而不必再次执行函数。每当触发重新渲染时，调用方法将总会再次执行函数。 -->
+    <div>我是计算属性： {{  reversedMessage }}</div>
+    <div>我是方法： {{ reversedMessageFunc() }}</div>
+    <!-- 计算属性 vs 侦听属性 1、计算属性默认只有getter,必要时可以提供一个setter函数 
+                            2、当需要在数据变化时执行异步或开销较大的操作时，选用侦听属性 
+                            3、使用 watch 选项允许我们执行异步操作 (访问一个 API)，限制我们执行该操作的频率，并在我们得到最终结果前，设置中间状态。这些都是计算属性无法做到的-->
+    <div>{{ fullName }}</div>
+
+    <!-- class 与 style 绑定，v-bind:class 也可以与普通的class属性共存, 与class="{{ className }}" 方式不能共存 -->
+    <div v-bind:class="{ textColor: isActive }">isActive 的值为true的时候我是红色的</div>
+    <!-- 常用并且很强大的模式：在v-bind:class绑定一个返回对象的计算属性 -->
+    <div v-bind:class="classObject">我的样式由计算属性决定的</div>
+    <!-- 可以给 v-bind:class 传入一个数组，数组中的内容在class中定义，数组中的每个元素也可以使用三元表达式计算要应用的class -->
+    <div v-bind:class="[activeClass]">我是以数组形式传进来的哦</div>
+    <!-- 在数组语法中也可以使用对象语法 -->
+    <div v-bind:class="[{ textColor: isActive }, errorClass]">数组语法与对象语法混用</div>
+
+    <!-- 绑定内联样式：v-bind:style -->
+    <div v-bind:style="{ color: activeColor, fontSize: fontSize + 'px' }">绑定内联样式</div>
+    <div v-bind:style="styleObject">以对象形式传入v-bind:style</div>
+    <!-- v-bind:style 的数组语法可以将多个样式对象应用到同一个元素上 -->
+    <!-- 从 2.3.0 起你可以为 style 绑定中的属性提供一个包含多个值的数组，常用于提供多个带前缀的值 -->
+    <div :style="{ display: ['-webkit-box', '-ms-flexbox', 'flex'] }"></div>
   </div>
   
   <script>
@@ -51,7 +88,21 @@
         {id: "0", text: "老师"},
         {id: "1", text: "画家"},
         {id: "2", text: "程序员"}
-      ]
+      ],
+      firstName: "foo",
+      lastName: "bar",
+      // reversedMessage: '',
+      isActive: true,
+      error: false,
+      activeClass: 'textColor',
+      errorClass: 'errorClass',
+      activeColor: 'blue',
+      fontSize: 30,
+      styleObject: {
+        color: 'blue',
+        // 注意驼峰式命名
+        fontSize: '30px'
+      }
     }
     // Object.freeze(data);    // 阻止修改现有的属性，也意味着响应系统无法再追踪变化。
     var app = new Vue({
@@ -71,6 +122,9 @@
         // 此方法只关注逻辑即可，并没有触及DOM
         reverseDream: function() {
           this.dreams.reverse();
+        },
+        reversedMessageFunc: function () {
+          return this.message.split('').reverse().join('')
         }
       },
       // day02 实例生命周期钩子
@@ -107,6 +161,30 @@
       // 实例与视图解绑，修改实例，视图不会再响应更新
       destroyed() {
       
+      },
+      computed: {
+        // 计算属性的 getter
+        reversedMessage: function () {
+          // `this` 指向 vm 实例
+          return this.message.split('').reverse().join('')
+        },
+        classObject: function () {
+          return {
+            'textColor': this.isActive && !this.error
+          }
+        },
+        fullName: {
+          // getter
+          get: function () {
+            return this.firstName + ' ' + this.lastName
+          },
+          // setter
+          set: function (newValue) {
+            var names = newValue.split(' ')
+            this.firstName = names[0]
+            this.lastName = names[names.length - 1]
+          }
+        }
       }
     });
   </script>
