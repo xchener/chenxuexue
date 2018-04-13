@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+  <!-- v-bind为指令：将这个元素节点的 title 特性和 Vue 实例的 message 属性保持一致 -->
+  <div id="app" :title="message">
+    <!-- day01 -->
+    <div>{{message}}</div>
+    <!-- v-model 指令，实现表单输入和应用状态之间的双向绑定 -->
+    <input v-model="message">
+    <div v-if="seen">条件与循环,能看到我的条件是seen为true哦</div>
+    <!-- v-for指令 -->
+    <p>你想成为什么</p>
+    <ul>
+      <li v-for="dream in dreams">{{dream.text}}</li>
+    </ul>
+    <div>
+      <button @click="reverseDream">v-on添加事件监听</button>
+    </div>
+    <ol>
+      <todo-item v-for="dream in dreams" :dream="dream" :key="dream.id"></todo-item>
+    </ol>
+
+    <!-- day02 -->
+    <!-- v-once指令插入的值不会随着实例数据的改变而更新 -->
+    <div v-once>{{message}}</div>
+    <!-- 指令 (Directives) 是带有 v- 前缀的特殊属性。指令属性的值预期是单个 JavaScript 表达式 (v-for 是例外情况)。指令的职责是，当表达式的值改变时，将其产生的连带影响，响应式地作用于 DOM。 -->
+    <!-- 修饰符：以半角句号 . 指明的特殊后缀，用于指出一个指令应该以特殊方式绑定 -->
+    <!-- v-bind的缩写“:”，v-on的缩写“@” -->
+  </div>
+  
+  <script>
+    // day01
+    // 一个组件本质上是一个拥有预定义选项的一个 Vue 实例【注：组件要定义在创建实例Vue之前】，props完成父子组件间的通信
+    // 所有的 Vue 组件都是 Vue 实例，并且接受相同的选项对象
+    Vue.component("todo-item",{
+      props: ["dream"],
+      template: "<li>{{dream.text}}</li>"
+    })
+    // 声明式渲染,数据与DOM进行了关联，所有的东西都是响应式的。
+    var data = {
+      message: "Hello Vue!",
+      seen: true,
+      dreams: [
+        {id: "0", text: "老师"},
+        {id: "1", text: "画家"},
+        {id: "2", text: "程序员"}
+      ]
+    }
+    // Object.freeze(data);    // 阻止修改现有的属性，也意味着响应系统无法再追踪变化。
+    var app = new Vue({
+      el: "#app",
+      //  *** 只有当实例被创建时data中存在的属性才是响应式的 ***，若一开始为空或者不存在，仅设置一些初始值就可以。
+      // data: {
+      //   message: "Hello Vue!",
+      //   seen: true,
+      //   dreams: [
+      //     {id: "0", text: "老师"},
+      //     {id: "1", text: "画家"},
+      //     {id: "2", text: "程序员"}
+      //   ]
+      // },
+      data: data,
+      methods: {
+        // 此方法只关注逻辑即可，并没有触及DOM
+        reverseDream: function() {
+          this.dreams.reverse();
+        }
+      },
+      // day02 实例生命周期钩子
+      // 创建实例前执行
+      beforeCreate() {
+        console.log("-- beforeCreate --", this.$el);    // undefined
+        console.log("-- beforeCreate --", this.$data);  // undefined
+      },
+      // 实例创建完成后执行
+      created() {
+        console.log("-- created --", this.$el);    // undefined
+        console.log("-- created --", this.$data);  // Object
+      },
+      // $el关联到DOM，但还没有渲染数据
+      beforeMount() {
+        console.log("-- beforeMount --", this.$el);    // DOM + 表达式无数据 eg: <div>{{message}}</div>
+        console.log("-- beforeMount --", this.$data);  // Object
+      },
+      // 渲染数据完成
+      mounted() {
+        console.log("-- mounted --", this.$el);    // DOM + 表达式被渲染为数据 eg: <div>我是message的值</div>
+        console.log("-- mounted --", this.$data);  // Object
+      },
+      // 更新之前视图并未渲染？？？为什么打印出来的$el中的HTML为修改之后的值？？？
+      beforeUpdate() {
+        console.log("-- beforeUpdate --", this.$el);    // DOM + 表达式被渲染为数据 eg: <div>我是更改之后的值</div>
+        console.log("-- beforeUpdate --", this.$data);  // Object
+      },
+      // 更新完成视图已更新
+      updated() {
+        console.log("-- updated --", this.$el);    // DOM + 表达式被渲染为数据 eg: <div>我是更改之后的值</div>
+        console.log("-- updated --", this.$data);  // Object
+      },
+      // 实例与视图解绑，修改实例，视图不会再响应更新
+      destroyed() {
+      
+      }
+    });
+  </script>
+</body>
+</html>
